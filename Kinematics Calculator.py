@@ -17,6 +17,26 @@ def parse_text(text):
     except ValueError:
         return None
 
+X0 = None
+V0 = None
+A = None
+T0 = None
+T = None
+X = None
+DX = None
+V = None
+
+Y0 = None
+Y = None
+Vy0 = None
+Vy = None
+Ay = None
+DY = None
+
+Target_value = None
+YTarget_value = None
+
+
 def mainwindow():
     root=tk.Tk()
     root.title("Kinematics Calculator")
@@ -74,35 +94,41 @@ def mainwindow():
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #                                                    Second UI Dimension
 
-    root.Y0_label=Label(root, text="9. Initial Y Position (Y0): ", bg="gray", fg="black", font=("helvetica", 12))
+    root.Y0_label=Label(root, text="1. Initial Y Position (Y0): ", bg="gray", fg="black", font=("helvetica", 12))
     root.Y0_label.grid(row=10, column=14)
     root.Y0_field=Entry(root, bg="white", fg="black", font=("helvetica", 12))
     root.Y0_field.grid(row=10, column=15)
 
-    root.Y_label=Label(root, text="10. Final Y Position (Y): ", bg="gray", fg="black", font=("helvetica", 12))
+    root.Y_label=Label(root, text="2. Final Y Position (Y): ", bg="gray", fg="black", font=("helvetica", 12))
     root.Y_label.grid(row=11, column=14)
     root.Y_field=Entry(root, bg="white", fg="black", font=("helvetica", 12))
     root.Y_field.grid(row=11, column=15)
 
-    root.Vy0_label=Label(root, text="11. Initial Y Velocity (Vy0): ", bg="gray", fg="black", font=("helvetica", 12))
+    root.Vy0_label=Label(root, text="3. Initial Y Velocity (Vy0): ", bg="gray", fg="black", font=("helvetica", 12))
     root.Vy0_label.grid(row=12, column=14)
     root.Vy0_field=Entry(root, bg="white", fg="black", font=("helvetica", 12))
     root.Vy0_field.grid(row=12, column=15)
 
-    root.Vy_label=Label(root, text="12. Final Y Velocity (Vy): ", bg="gray", fg="black", font=("helvetica", 12))
+    root.Vy_label=Label(root, text="4. Final Y Velocity (Vy): ", bg="gray", fg="black", font=("helvetica", 12))
     root.Vy_label.grid(row=13, column=14)
     root.Vy_field=Entry(root, bg="white", fg="black", font=("helvetica", 12))
     root.Vy_field.grid(row=13, column=15)
 
-    root.Ay_label=Label(root, text="13. Y Acceleration (Ay): ", bg="gray", fg="black", font=("helvetica", 12))
+    root.Ay_label=Label(root, text="5. Y Acceleration (Ay): ", bg="gray", fg="black", font=("helvetica", 12))
     root.Ay_label.grid(row=14, column=14)
     root.Ay_field=Entry(root, bg="white", fg="black", font=("helvetica", 12))
     root.Ay_field.grid(row=14, column=15)
 
-    root.DY_label=Label(root, text="14. Y Displacement (DY): ", bg="gray", fg="black", font=("helvetica", 12))
+    root.DY_label=Label(root, text="6. Y Displacement (DY): ", bg="gray", fg="black", font=("helvetica", 12))
     root.DY_label.grid(row=15, column=14)
     root.DY_field=Entry(root, bg="white", fg="black", font=("helvetica", 12))
     root.DY_field.grid(row=15, column=15)
+
+
+    root.Y_Target_select_label=Label(root, text="Target Value no.: ", bg="silver", fg="blue", font=("helvetica", 12))
+    root.Y_Target_select_label.grid(row=16, column=14)
+    root.Y_Target_select_field=Entry(root, bg="white", fg="black", font=("helvetica", 12))
+    root.Y_Target_select_field.grid(row=16, column=15)
 
 #//////////////////////////////////////////////////---Calculations---//////////////////////////////////////////////////////////////////////////
     def error_page(type):
@@ -142,6 +168,10 @@ def mainwindow():
         DY = parse_text(root.DY_field.get())
 
         Target_value = (root.Target_select_field.get())
+        YTarget_value = (root.Y_Target_select_field.get())
+
+        friendly_little_friend = None
+        very_friendly_little_friend = None
 
 
         if Target_value == "1":
@@ -157,9 +187,9 @@ def mainwindow():
 
         elif Target_value == "2":
             print("Finding Initial Velocity...")
-            if V is not None:
+            if V0 is not None and A is not None and T is not None and T0 is not None:
                 friendly_little_friend= V0 + A(T-T0)
-            elif X is not None and X0 is not None and T0 is not None and T is not None:
+            elif X is not None and X0 is not None and T0 is not None and T is not None and A is not None:
                 friendly_little_friend= (X - X0 - 0.5*A* (T-T0)**2) / (T-T0)
             elif V is not None and A is not None and X is not None and X0 is not None:
                 friendly_little_friend= math.sqrt(V**2 - 2*A*(X-X0))
@@ -179,12 +209,27 @@ def mainwindow():
 
         elif Target_value =="4":
             print("Finding Initial Time...")
-            if V is not None and V0 is not None and A is not None:
+            if V is not None and V0 is not None and A is not None and T is not None:
                 friendly_little_friend = T - (V - V0) / A
-            elif X is not None and X0 is not None and V0 is not None and A is not None:
+            elif X is not None and X0 is not None and V0 is not None and A is not None and T is not None:
                 a_coef = 0.5 * A
                 b_coef = V0 - A * T
                 c_coef = X0 - X
+                discriminant = b_coef**2 - 4*a_coef*c_coef
+                if discriminant < 0:
+                    error_page("insufficient")
+                else:
+                    sqrt_disc = math.sqrt(discriminant)
+                    delta_T0_1 = (-b_coef + sqrt_disc) / (2 * a_coef)
+                    delta_T0_2 = (-b_coef - sqrt_disc) / (2 * a_coef)
+                    delta_T0 = max(delta_T0_1, delta_T0_2)
+                    friendly_little_friend = T - delta_T0
+            elif Vy is not None and Vy0 is not None and Ay is not None:
+                friendly_little_friend = T - (Vy - Vy0) / Ay
+            elif Y is not None and Y0 is not None and Vy0 is not None and Ay is not None and T is not None:
+                a_coef = 0.5 * Ay
+                b_coef = Vy0 - Ay * T
+                c_coef = Y0 - Y
                 discriminant = b_coef**2 - 4*a_coef*c_coef
                 if discriminant < 0:
                     error_page("insufficient")
@@ -199,12 +244,27 @@ def mainwindow():
 
         elif Target_value == "5":
             print("Finding Final Time...")
-            if V is not None and V0 is not None and A is not None:
+            if V is not None and V0 is not None and A is not None and T0 is not None:
                 friendly_little_friend = T0 + (V - V0) / A
             elif X is not None and X0 is not None and V0 is not None and A is not None:
                 a_coef = 0.5 * A
                 b_coef = V0
                 c_coef = X0 - X
+                discriminant = b_coef**2 - 4*a_coef*c_coef
+                if discriminant < 0:
+                    error_page("insufficient")
+                else:
+                    sqrt_disc = math.sqrt(discriminant)
+                    delta_T1 = (-b_coef + sqrt_disc) / (2 * a_coef)
+                    delta_T2 = (-b_coef - sqrt_disc) / (2 * a_coef)
+                    delta_T = max(delta_T1, delta_T2)
+                    friendly_little_friend = T0 + delta_T
+            elif Vy is not None and Vy0 is not None and Ay is not None and T0 is not None:
+                friendly_little_friend = T0 + (Vy - Vy0) / Ay
+            elif Y is not None and Y0 is not None and Vy0 is not None and Ay is not None:
+                a_coef = 0.5 * Ay
+                b_coef = Vy0
+                c_coef = Y0 - Y
                 discriminant = b_coef**2 - 4*a_coef*c_coef
                 if discriminant < 0:
                     error_page("insufficient")
@@ -221,7 +281,7 @@ def mainwindow():
             print("Finding Final Position...")
             if X0 is not None and V0 is not None and T is not None and T0 is not None and A is not None:
                 friendly_little_friend= X0 + V0*(T-T0) + 0.5*A*(T - T0)**2
-            elif X is not None and V is not None and A is not None and V0 is not None:
+            elif X0 is not None and V is not None and A is not None and V0 is not None:
                 friendly_little_friend= X0 + ((V**2 - V0**2) / (2*A))
             elif X0 is not None and DX is not None:
                 friendly_little_friend= X0 + DX
@@ -241,85 +301,91 @@ def mainwindow():
 
         elif Target_value == "8":
             print("Finding Target Velocity...")
-            if V0 is not None and T is not None and T0 is not None:
+            if V0 is not None and T is not None and T0 is not None and A is not None:
                 friendly_little_friend= V0 + A * (T - T0)
             elif V0 is not None and A is not None and X0 is not None and X is not None:
                 friendly_little_friend = (V0**2 + 2*A*(X - X0))**0.5
             else:
                 error_page("insufficient")
 #/////////////////////////////////////////////////////////////////////////////////////////////////////////////// Y Calculations
-        elif Target_value == "9":
+        if YTarget_value == "1":
             print("Finding Initial Y Position...")
             if Y is not None and Vy0 is not None and T is not None and T0 is not None and Ay is not None:
-                friendly_little_friend= Y - Vy0*(T - T0) - 0.5*Ay*(T - T0)**2
+                very_friendly_little_friend= Y - Vy0*(T - T0) - 0.5*Ay*(T - T0)**2
             elif Y is not None and Vy is not None and Vy0 is not None and Ay is not None:
-                friendly_little_friend= Y - ((Vy**2 - Vy0**2) / (2*Ay))
+                very_friendly_little_friend= Y - ((Vy**2 - Vy0**2) / (2*Ay))
             elif Y is not None and DY is not None:
-                friendly_little_friend= Y - DY
+                very_friendly_little_friend= Y - DY
             else:
                 error_page("insufficient")
 
-        elif Target_value == "10":
+        elif YTarget_value == "2":
             print("Finding Initial Y Position...")
             if Y0 is not None and Vy0 is not None and T is not None and T0 is not None and Ay is not None:
-                friendly_little_friend= Y0 + Vy0*(T-T0) + 0.5*Ay*(T - T0)**2
-            elif Y is not None and Vy is not None and Ay is not None and Vy0 is not None:
-                friendly_little_friend= Y0 + ((Vy**2 - Vy0**2) / (2*Ay))
+                very_friendly_little_friend= Y0 + Vy0*(T-T0) + 0.5*Ay*(T - T0)**2
+            elif Y0 is not None and Vy is not None and Ay is not None and Vy0 is not None:
+                very_friendly_little_friend= Y0 + ((Vy**2 - Vy0**2) / (2*Ay))
             elif Y0 is not None and DY is not None:
-                friendly_little_friend= Y0 + DY
+                very_friendly_little_friend= Y0 + DY
             else:
                 error_page("insufficient")
 
-        elif Target_value == "11":
+        elif YTarget_value == "3":
             print("Finding Initial Y Velocity...")
-            if V is not None:
-                friendly_little_friend= V + Ay(T-T0)
+            if V is not None and Ay is not None and T is not None and T0 is not None:
+                very_friendly_little_friend= V + Ay(T-T0)
             elif Y is not None and Y0 is not None and T0 is not None and T is not None:
-                friendly_little_friend= (Y - Y0 - 0.5*Ay* (T-T0)**2) / (T-T0)
+                very_friendly_little_friend= (Y - Y0 - 0.5*Ay* (T-T0)**2) / (T-T0)
             elif Vy is not None and Ay is not None and Y is not None and Y0 is not None:
-                friendly_little_friend= math.sqrt(Vy**2 - 2*Ay*(Y-Y0))
+                very_friendly_little_friend= math.sqrt(Vy**2 - 2*Ay*(Y-Y0))
             else:
                 error_page("insufficient")
 
-        elif Target_value == "12":
+        elif YTarget_value == "4":
             print("Finding Final Y Velocity...")
-            if Vy0 is not None and T is not None and T0 is not None:
-                friendly_little_friend= Vy0 + Ay * (T - T0)
+            if Vy0 is not None and T is not None and T0 is not None and Ay is not None:
+                very_friendly_little_friend= Vy0 + Ay * (T - T0)
             elif Vy0 is not None and Ay is not None and Y0 is not None and Y is not None:
-                friendly_little_friend = (Vy0**2 + 2*Ay*(Y - Y0))**0.5
+                very_friendly_little_friend = (Vy0**2 + 2*Ay*(Y - Y0))**0.5
             else:
                 error_page("insufficient")
 
-        elif Target_value == "13":
+        elif YTarget_value == "5":
             print("Finding Y Acceleration...")
             if Vy is not None and Vy0 is not None and T is not None and T0 is not None:
-                friendly_little_friend= (Vy - Vy0) / (T-T0)
+                very_friendly_little_friend= (Vy - Vy0) / (T-T0)
             elif Y is not None and Y0 is not None and Vy0 is not None and T is not None and T0 is not None:
-                friendly_little_friend= (2*(Y - Y0 - Vy0*(T - T0))) / (T - T0)**2
+                very_friendly_little_friend= (2*(Y - Y0 - Vy0*(T - T0))) / (T - T0)**2
             elif Vy is not None and Vy0 is not None and Y is not None and Y0 is not None:
-                friendly_little_friend= (Vy**2 - Vy0**2) / (2*(Y - Y0))
+                very_friendly_little_friend= (Vy**2 - Vy0**2) / (2*(Y - Y0))
             else:
                 error_page("insufficient")
 
-        elif Target_value == "14":
+        elif YTarget_value == "6":
             print("Finding Y Displacement...")
             if Y is not None and Y0 is not None:
-                friendly_little_friend= Y - Y0
+                very_friendly_little_friend= Y - Y0
             elif Vy0 is not None and Ay is not None and T is not None and T0 is not None:
-                friendly_little_friend= Vy0 * (T-T0) + 0.5*Ay*(T-T0)**2
+                very_friendly_little_friend= Vy0 * (T-T0) + 0.5*Ay*(T-T0)**2
             elif Vy is not None and Vy0 is not None and Ay is not None:
-                friendly_little_friend= (Vy**2 - Vy0**2)/(2*Ay)
+                very_friendly_little_friend= (Vy**2 - Vy0**2)/(2*Ay)
             else:
                 error_page("insufficient")
 
-        else:
-            error_page("error")
+        # if Target_value not in ["1","2","3","4","5","6","7","8"] or YTarget_value not in ["1","2","3","4","5","6"] or Target_value is not None or YTarget_value is not None:
+        #     error_page("error")
 
         # print(X0,V0,A,T0,T,DX,V)
 
-        print(friendly_little_friend)
-        solution=tk.Label(root, font="Helvetica", bg="green", fg="silver", text= friendly_little_friend)
-        solution.grid(row= 25, column= 10)
+        if friendly_little_friend is not None:
+            print(friendly_little_friend)
+            solution=tk.Label(root, font="Helvetica", bg="green", fg="silver", text= friendly_little_friend)
+            solution.grid(row= 25, column= 10)
+
+        if very_friendly_little_friend is not None:
+            print(very_friendly_little_friend)
+            y_solution=tk.Label(root, font="Helvetica", bg="green", fg="silver", text= very_friendly_little_friend)
+            y_solution.grid(row= 25, column= 15)
 
 
     root.Calc_button=Button(root, text="Calculate", bg="blue", fg="silver", font=("impact", 12), command=lambda:run_calculations())
