@@ -372,6 +372,7 @@ def mainwindow():
             else:
                 error_page("insufficient")
 
+        # Not currently functional:
         # if Target_value not in ["1","2","3","4","5","6","7","8"] or YTarget_value not in ["1","2","3","4","5","6"] or Target_value is not None or YTarget_value is not None:
         #     error_page("error")
 
